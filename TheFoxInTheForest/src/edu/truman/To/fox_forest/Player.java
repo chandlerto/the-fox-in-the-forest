@@ -1,25 +1,22 @@
 package edu.truman.To.fox_forest;
 
-import java.util.ArrayList;
-
 /**
  * Represents a character playing the game, whether
  * controlled by the user or by the program.
  * 
- * @author ct2883
+ * @author Chandler To
  *
  */
 
 
 public interface Player {
 	
-	ArrayList<Card> hand = new ArrayList<Card>();
-	
 	/**
 	 * Adds cards to the player's hand from the deck to reach the desired size.
 	 * After cards are drawn, the cards are then sorted.
 	 * @param deck the deck the player is drawing from.
 	 * @param handSize the amount of cards the player will have in hand.
+	 * @precondition handSize + the player's current hand size <= deck's size
 	 */
 	void drawHand(Deck deck, int handSize);
 	

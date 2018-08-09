@@ -5,7 +5,7 @@ import java.util.Scanner;
 /**
  * Represents a Player controlled by the user.
  * 
- * @author ct2883
+ * @author Chandler To
  *
  */
 public class Human implements Player {
@@ -23,6 +23,17 @@ public class Human implements Player {
 	 * {@inheritDoc}
 	 */
 	@Override
+	public void drawHand(Deck deck, int handSize) {
+		while (hand.size() < handSize) {
+			hand.add(deck.draw());
+		}
+		sortHand();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
 	public void sortHand() {
 		for (int i = 0; i < hand.size(); i++) {
 			int minIdx= 0;
@@ -33,17 +44,6 @@ public class Human implements Player {
 			}
 			hand.add(hand.remove(minIdx));
 		}
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void drawHand(Deck deck, int handSize) {
-		while (hand.size() < handSize) {
-			hand.add(deck.draw());
-		}
-		sortHand();
 	}
 
 	/**
@@ -70,6 +70,17 @@ public class Human implements Player {
 	}
 
 	/**
+	 * Prints to the console the player's hand in a numbered list.
+	 */
+	private void printHand() {
+		int i = 1;
+		for (Card card : hand) {
+			System.out.println(i + ") " + card.toString());
+			i++;
+		}
+	}
+	
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -81,10 +92,9 @@ public class Human implements Player {
 				int highIdx = getHighIdx(lead.getSuit());
 				int oneIdx = hand.indexOf(new Card(1, lead.getSuit()));
 				if (oneIdx != -1 && oneIdx != highIdx) {
-					System.out.println(oneIdx+1 + ") 1 of " + Card.SUITS[lead.getSuit()]);
+					System.out.println(oneIdx+1 + ") " + hand.get(oneIdx).toString());
 				}
-				System.out.println(highIdx+1 + ") " + hand.get(highIdx).getValue() + " of " +
-									Card.SUITS[lead.getSuit()]);
+				System.out.println(highIdx+1 + ") " + hand.get(highIdx).toString());
 				
 				Scanner scandy = new Scanner(System.in);
 				int userInput = -1;
@@ -141,18 +151,7 @@ public class Human implements Player {
 			return hand.remove(userInput-1);
 		}
 	}
-	
-	/**
-	 * Prints to the console the player's hand in a numbered list.
-	 */
-	private void printHand() {
-		int i = 1;
-		for (Card card : hand) {
-			System.out.println(i + ") " + card.getValue() + " of " + Card.SUITS[card.getSuit()]);
-			i++;
-		}
-	}
-	
+		
 	/**
 	 * Determines if the player contains a card of the given suit.
 	 * 
@@ -202,7 +201,7 @@ public class Human implements Player {
 		Scanner scandy = new Scanner(System.in);
 		int userInput = 1;
 		System.out.println("USING FOX ABILITY: SWAP WITH DECREE CARD");
-		System.out.println("0) " + current.getValue() + " of " + Card.SUITS[current.getSuit()]);
+		System.out.println("0) " + current.toString());
 		this.printHand();
 		System.out.println("Select any card to swap with the Decree Card (or enter 0 to not swap).");
 		boolean invalidInput = true;
@@ -234,7 +233,7 @@ public class Human implements Player {
 		Scanner scandy = new Scanner(System.in);
 		int userInput = 1;
 		System.out.println("USING WOODCUTTER ABILITY: DRAW AND DISCARD A CARD");
-		System.out.println("0) " + drawn.getValue() + " of " + Card.SUITS[drawn.getSuit()]);
+		System.out.println("0) " + drawn.toString());
 		this.printHand();
 		System.out.println("Select any card to discard (or enter 0 to discard the drawn card).");
 		boolean invalidInput = true;

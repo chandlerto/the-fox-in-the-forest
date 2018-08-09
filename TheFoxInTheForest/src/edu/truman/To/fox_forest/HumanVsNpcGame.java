@@ -2,21 +2,21 @@ package edu.truman.To.fox_forest;
 
 /**
  * Represents the entire game, including the players, cards, and scores.
- * Both Players are controlled by the user.
+ * One player is controlled by the user, while the other
+ * is controlled by the computer.
  * 
  * @author Chandler To
  *
  */
-
-public class TwoHumanGame {
+public class HumanVsNpcGame {
 
 	static final int HAND_SIZE = 13;
 	static final int WIN_SCORE = 21;
 	static final int[] endOfRoundScore = {6,6,6,6,1,2,3,6,6,6,0,0,0,0};
 	
 	final Deck deck;
-	final Player human;
-	final Player npc;
+	final Human human;
+	final Npc npc;
 	Card humanCard;
 	Card npcCard;
 	Card decreeCard;
@@ -28,13 +28,14 @@ public class TwoHumanGame {
 	boolean isHumanSwan;
 	boolean isNpcSwan;
 	
+	
 	/**
-	 * Creates a Game with two Human players.
+	 * Creates a Game with a human player and an npc player.
 	 */
-	public TwoHumanGame() {
+	public HumanVsNpcGame(Npc npc) {
 		deck = new Deck();
 		human = new Human();
-		npc = new Human();
+		this.npc = npc;
 	}
 	
 	/**
@@ -55,15 +56,14 @@ public class TwoHumanGame {
 					humanCard = human.selectCardFirst();
 					handleFirstThreeAbilities(human, humanCard);
 					
-					printGameInfo();
-					System.out.println("NPC IS FOLLOWING");
 					npcCard = npc.selectCardSecond(humanCard);
+					printNpcTurn();
 					handleFirstThreeAbilities(npc, npcCard);
+					
 				}
 				
 				else {
-					printGameInfo();
-					System.out.println("NPC IS LEADING");
+					
 					npcCard = npc.selectCardFirst();
 					handleFirstThreeAbilities(npc, npcCard);
 					
@@ -89,15 +89,15 @@ public class TwoHumanGame {
 	private void printGameInfo() {
 		System.out.println("\nVP: " + humanVictoryPoints + "-" + npcVictoryPoints);
 		System.out.println("RS: " + humanRoundScore + "-" + npcRoundScore);
-		System.out.println("Decree Card: " + decreeCard.toString());
+		System.out.println("Decree Card: " + decreeCard.getValue() + " of " + Card.SUITS[decreeCard.getSuit()]);
 		if (humanCard != null) {
-			System.out.println("Human Card: " + humanCard.toString());
+			System.out.println("Human Card: " + humanCard.getValue() + " of " + Card.SUITS[humanCard.getSuit()]);
 		}
 		else {
 			System.out.println("Human Card: Not yet selected");
 		}
 		if (npcCard != null) {
-			System.out.println("NPC Card: " + npcCard.toString());
+			System.out.println("NPC Card: " + npcCard.getValue() + " of " + Card.SUITS[npcCard.getSuit()]);
 		}
 		else {
 			System.out.println("NPC Card: Not yet selected");
@@ -107,25 +107,57 @@ public class TwoHumanGame {
 	
 	/**
 	 * Checks for and handles the Swan, Fox, and Woodcutter abilities.
-	 * Used after a player plays a card.
+	 * Used after a Human plays a card.
 	 * 
-	 * @param player the player who played the card.
+	 * @param human the Human who played the card.
 	 * @param card the card that was played.
 	 */
-	private void handleFirstThreeAbilities(Player player, Card card) {
+	private void handleFirstThreeAbilities(Human human, Card card) {
 		if (card.getValue() == Card.SWAN_VALUE) {
-			if (player == human) {
-				isHumanSwan = true;
-			}
-			else if (player == npc) {
-				isNpcSwan = true;
-			}
+			isHumanSwan = true;
 		}
 		if (card.getValue() == Card.FOX_VALUE) {
-			decreeCard = player.swapDecreeCard(decreeCard);
+			decreeCard = human.swapDecreeCard(decreeCard);
 		}
 		else if (card.getValue() == Card.WOODCUTTER_VALUE) {
-			deck.putBottom(player.drawAndDiscard(deck.draw()));
+			deck.putBottom(human.drawAndDiscard(deck.draw()));
+		}
+	}
+	
+	/**
+	 * Checks for and handles the Swan, Fox, and Woodcutter abilities.
+	 * Used after a Human plays a card.
+	 * 
+	 * @param human the Human who played the card.
+	 * @param card the card that was played.
+	 */
+	private void handleFirstThreeAbilities(Npc npc, Card card) {
+		if (card.getValue() == Card.SWAN_VALUE) {
+			isNpcSwan = true;
+		}
+		if (card.getValue() == Card.FOX_VALUE) {
+			System.out.println("\nNpc triggers the Fox ability.");
+			System.out.println("Npc places the " + decreeCard.toString() + " into its hand.");
+			decreeCard = npc.swapDecreeCard(decreeCard);
+			System.out.println("The new decree card is the " + decreeCard.toString() + ".");
+		}
+		else if (card.getValue() == Card.WOODCUTTER_VALUE) {
+			System.out.println("\nNpc triggers the Woodcutter ability.");
+			System.out.println("Npc draws a card from the deck, then discards a card.");
+			deck.putBottom(npc.drawAndDiscard(deck.draw()));
+		}
+	}
+	
+	/**
+	 * Prints a message showing the card the npc just played.
+	 * Used when the npc plays a card.
+	 */
+	private void printNpcTurn() {
+		if (humanFirst) {
+			System.out.println("Npc follows with the " + npcCard.toString());
+		}
+		else {
+			System.out.println("Npc leads with the " + npcCard.toString()); 
 		}
 	}
 	
@@ -213,14 +245,12 @@ public class TwoHumanGame {
 				System.out.println("Tie, so leading player wins the trick");
 				return humanFirst ? human : npc;
 			}
-		}
-		
+		}	
 	}
 	
 	/**
 	 * Places the Player's cards onto the bottom of the deck.
 	 */
-	
 	private void resetTrick() {
 		Card temp = npcCard;
 		npcCard = null;
@@ -274,5 +304,4 @@ public class TwoHumanGame {
 			System.out.println("You lost the last round, so you lose...");
 		}
 	}
-	
 }

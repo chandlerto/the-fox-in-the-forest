@@ -6,7 +6,7 @@ import java.util.LinkedList;
 /**
  * Represents the deck containing the cards not in play or in a player's hand.
  * 
- * @author ct2883
+ * @author Chandler To
  *
  */
 

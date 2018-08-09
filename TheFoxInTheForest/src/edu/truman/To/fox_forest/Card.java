@@ -64,5 +64,13 @@ public class Card {
 			return this.suit - other.suit;
 	}
 	
+	/**
+	 * Returns a string representation of the card.
+	 * Formated as "(value) of (suit)"
+	 */
+	public String toString() {
+		return this.value + " of " + SUITS[this.suit];
+	}
+	
 	
 }
