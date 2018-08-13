@@ -54,6 +54,8 @@ public class HighDummyNpc extends Npc {
 	/**
 	 * Selects and removes the highest valued card in hand,
 	 * as determined by the Card class' compareTo method.
+	 * 
+	 * @return the highest valued card in hand
 	 */
 	@Override
 	public Card selectCardFirst() {
@@ -86,6 +88,7 @@ public class HighDummyNpc extends Npc {
 	 * the player to switch the decree card with a card from hand.
 	 * 
 	 * @param current the card that is offered, but discarded.
+	 * @return the card that is discarded (in this case, the given card)
 	 */
 	@Override
 	public Card swapDecreeCard(Card current) {
@@ -99,6 +102,7 @@ public class HighDummyNpc extends Npc {
 	 * the player draw a card from the deck, then discard a card from hand.
 	 * 
 	 * @param drawn the card that is offered, but discarded.
+	 * @return the card that is discarded (in this case, the given card)
 	 */
 	@Override
 	public Card drawAndDiscard(Card drawn) {

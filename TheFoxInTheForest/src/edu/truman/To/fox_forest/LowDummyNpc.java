@@ -54,6 +54,8 @@ public class LowDummyNpc extends Npc {
 	/**
 	 * Selects and removes the lowest valued card in hand,
 	 * as determined by the Card class' compareTo method.
+	 * 
+	 * @return the lowest valued card in hand
 	 */
 	@Override
 	public Card selectCardFirst() {
@@ -72,7 +74,7 @@ public class LowDummyNpc extends Npc {
 	public Card selectCardSecond(Card lead) {
 		int leadSuit = lead.getSuit();
 		
-		if (lead.getValue() == Card.SWAN_VALUE) {
+		if (lead.getValue() == Card.MONARCH_VALUE) {
 			boolean hasSuit = false;
 			int highIdx = 0;
 			for (int i = hand.size()-1 ; i >= 0; i--) {
@@ -102,6 +104,7 @@ public class LowDummyNpc extends Npc {
 	 * the player to switch the decree card with a card from hand.
 	 * 
 	 * @param current the card that is offered, but discarded.
+	 * @return the card that is discarded (in this case, the given card)
 	 */
 	@Override
 	public Card swapDecreeCard(Card current) {
@@ -115,6 +118,7 @@ public class LowDummyNpc extends Npc {
 	 * the player draw a card from the deck, then discard a card from hand.
 	 * 
 	 * @param drawn the card that is offered, but discarded.
+	 * @return the card that is discarded (in this case, the given card)
 	 */
 	@Override
 	public Card drawAndDiscard(Card drawn) {
