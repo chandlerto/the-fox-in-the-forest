@@ -14,6 +14,7 @@ public interface Player {
 	/**
 	 * Adds cards to the player's hand from the deck to reach the desired size.
 	 * After cards are drawn, the cards are then sorted.
+	 * 
 	 * @param deck the deck the player is drawing from.
 	 * @param handSize the amount of cards the player will have in hand.
 	 * @precondition handSize + the player's current hand size <= deck's size

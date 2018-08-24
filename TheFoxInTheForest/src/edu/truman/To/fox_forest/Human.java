@@ -86,7 +86,7 @@ public class Human implements Player {
 	@Override
 	public Card selectCardSecond(Card lead) {
 		if (hasSuit(lead.getSuit())) {
-			if (lead.getValue() == Card.MONARCH_VALUE) {
+			if (lead.getValue() == Card.MONARCH) {
 				System.out.println("You must play either your highest " + Card.SUITS[lead.getSuit()] +
 									" or the 1 of that suit.");
 				int highIdx = getHighIdx(lead.getSuit());

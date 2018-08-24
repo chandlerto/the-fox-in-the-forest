@@ -10,6 +10,16 @@ package edu.truman.To.fox_forest;
 
 public abstract class Npc implements Player {
 
+	protected Game game;
+	
+	/**
+	 * Sets this player's game to be the given Game.
+	 * @param game the game the Npc is a part of
+	 */
+	public void addGame(Game game) {
+		this.game = game;
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */

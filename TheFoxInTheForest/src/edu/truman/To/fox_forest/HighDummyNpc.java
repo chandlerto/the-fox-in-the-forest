@@ -18,7 +18,7 @@ public class HighDummyNpc extends Npc {
 	private ArrayList<Card> hand;
 	
 	/**
-	 * Creates a HighDummyNpc with no cards.
+	 * Creates a HighDummyNpc with the given Game.
 	 */
 	public HighDummyNpc() {
 		hand = new ArrayList<Card>();

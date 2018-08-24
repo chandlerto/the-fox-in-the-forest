@@ -7,12 +7,16 @@ package edu.truman.To.fox_forest;
  */
 public class Card {
 	
-	final static int SWAN_VALUE = 1;
-	final static int FOX_VALUE = 3;
-	final static int WOODCUTTER_VALUE = 5;
-	final static int TREASURE_VALUE = 7;
-	final static int WITCH_VALUE = 9;
-	final static int MONARCH_VALUE = 11;
+	final static int MAX = 11;
+	final static int SWAN = 1;
+	final static int FOX = 3;
+	final static int WOODCUTTER = 5;
+	final static int TREASURE = 7;
+	final static int WITCH= 9;
+	final static int MONARCH = 11;
+	final static int BELLS = 0;
+	final static int KEYS = 1;
+	final static int MOONS = 2;
 	final static String[] SUITS = {"Bells", "Keys", "Moons"};
 	
 	private int value;
@@ -67,6 +71,8 @@ public class Card {
 	/**
 	 * Returns a string representation of the card.
 	 * Formated as "(value) of (suit)"
+	 * 
+	 * @return a string representing the card.
 	 */
 	public String toString() {
 		return this.value + " of " + SUITS[this.suit];

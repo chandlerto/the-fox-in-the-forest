@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 
 /**
- * Represents the deck containing the cards not in play or in a player's hand.
+ * Represents the deck containing the cards not in play nor in a player's hand.
  * 
  * @author Chandler To
  *
@@ -20,7 +20,7 @@ public class Deck {
 	 */
 	public Deck() {
 		cards = new LinkedList<Card>();
-		for (int i = 1; i <= 11; i++) {
+		for (int i = 1; i <= Card.MAX; i++) {
 			for (int j = 0; j < Card.SUITS.length; j++) {
 				cards.add(new Card(i, j));
 			}

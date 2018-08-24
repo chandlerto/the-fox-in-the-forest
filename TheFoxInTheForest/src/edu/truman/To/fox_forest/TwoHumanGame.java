@@ -8,7 +8,7 @@ package edu.truman.To.fox_forest;
  *
  */
 
-public class TwoHumanGame {
+public class TwoHumanGame extends Game {
 
 	static final int HAND_SIZE = 13;
 	static final int WIN_SCORE = 21;
@@ -41,7 +41,7 @@ public class TwoHumanGame {
 	 * Plays a game of The Fox In The Forest.
 	 */
 	public void playGame() {
-		int coinFlip = (int) (Math.random());
+		int coinFlip = (int) (Math.random() * 2);
 		humanFirst = coinFlip == 0? true : false;
 		while (humanVictoryPoints < WIN_SCORE && npcVictoryPoints < WIN_SCORE) {
 			deck.shuffle();
@@ -113,7 +113,7 @@ public class TwoHumanGame {
 	 * @param card the card that was played.
 	 */
 	private void handleFirstThreeAbilities(Player player, Card card) {
-		if (card.getValue() == Card.SWAN_VALUE) {
+		if (card.getValue() == Card.SWAN) {
 			if (player == human) {
 				isHumanSwan = true;
 			}
@@ -121,10 +121,10 @@ public class TwoHumanGame {
 				isNpcSwan = true;
 			}
 		}
-		if (card.getValue() == Card.FOX_VALUE) {
+		if (card.getValue() == Card.FOX) {
 			decreeCard = player.swapDecreeCard(decreeCard);
 		}
-		else if (card.getValue() == Card.WOODCUTTER_VALUE) {
+		else if (card.getValue() == Card.WOODCUTTER) {
 			deck.putBottom(player.drawAndDiscard(deck.draw()));
 		}
 	}
@@ -171,8 +171,8 @@ public class TwoHumanGame {
 	 * @return the Player that won the trick.
 	 */
 	private Player trickWinner() {
-		boolean isHumanWitch = humanCard.getValue() == Card.WITCH_VALUE ? true : false;
-		boolean isNpcWitch = npcCard.getValue() == Card.WITCH_VALUE ? true : false;
+		boolean isHumanWitch = humanCard.getValue() == Card.WITCH ? true : false;
+		boolean isNpcWitch = npcCard.getValue() == Card.WITCH ? true : false;
 		if (isHumanWitch && isNpcWitch) {
 			if (humanCard.getSuit() == decreeCard.getSuit()) {
 				System.out.println("Human wins by trump suit");
@@ -273,6 +273,33 @@ public class TwoHumanGame {
 		else {
 			System.out.println("You lost the last round, so you lose...");
 		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public Card getDecreeCard() {
+		return this.decreeCard;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getPlayerRoundScore(Player player) {
+		if (player == human)
+			return humanRoundScore;
+		else
+			return npcRoundScore;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getPlayerNeededPoints(Player player) {
+		if (player == human)
+			return WIN_SCORE - this.humanVictoryPoints;
+		else
+			return WIN_SCORE - this.npcVictoryPoints;
 	}
 	
 }

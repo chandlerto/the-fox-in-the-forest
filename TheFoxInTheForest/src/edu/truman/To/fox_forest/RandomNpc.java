@@ -15,6 +15,9 @@ public class RandomNpc extends Npc {
 
 	private ArrayList<Card> hand;
 	
+	/**
+	 * Creates a RandomNpc with the given Game.
+	 */
 	public RandomNpc() {
 		hand = new ArrayList<Card>();
 	}
@@ -48,6 +51,8 @@ public class RandomNpc extends Npc {
 
 	/**
 	 * Selects and removes any card in hand randomly.
+	 * 
+	 * @return the card the player is using.
 	 */
 	@Override
 	public Card selectCardFirst() {
@@ -64,7 +69,7 @@ public class RandomNpc extends Npc {
 	 */
 	@Override
 	public Card selectCardSecond(Card lead) {
-		if (lead.getValue() == Card.MONARCH_VALUE) {
+		if (lead.getValue() == Card.MONARCH) {
 			boolean useOne = ((int) Math.random()) == 0? true : false;
 			int lowIndex = lowestCardIndex(lead.getSuit());
 			int highIndex = highestCardIndex(lead.getSuit());

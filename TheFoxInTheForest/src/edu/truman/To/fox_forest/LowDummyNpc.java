@@ -18,7 +18,7 @@ public class LowDummyNpc extends Npc {
 	private ArrayList<Card> hand;
 	
 	/**
-	 * Creates a LowDummyNpc with no cards.
+	 * Creates a LowDummyNpc with the given Game.
 	 */
 	public LowDummyNpc() {
 		hand = new ArrayList<Card>();
@@ -74,7 +74,7 @@ public class LowDummyNpc extends Npc {
 	public Card selectCardSecond(Card lead) {
 		int leadSuit = lead.getSuit();
 		
-		if (lead.getValue() == Card.MONARCH_VALUE) {
+		if (lead.getValue() == Card.MONARCH) {
 			boolean hasSuit = false;
 			int highIdx = 0;
 			for (int i = hand.size()-1 ; i >= 0; i--) {

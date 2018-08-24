@@ -1,22 +1,25 @@
 package edu.truman.To.fox_forest;
 
 /**
- * Represents the entire game, including the players, cards, and scores.
- * Both Players are controlled by the computer.
+ * Plays a set amount of rounds between 2 Npcs.
+ * The player leading each round is randomly selected,
+ * so the result of each round is independent to the others. 
  * 
  * @author Chandler To
  *
  */
 
-public class NpcVsNpcGame extends Game {
+public class NpcVsNpcRoundSet extends Game {
 
 	static final int HAND_SIZE = 13;
-	static final int WIN_SCORE = 21;
 	static final int[] endOfRoundScore = {6,6,6,6,1,2,3,6,6,6,0,0,0,0};
 	
+	final int NUM_ROUNDS;
 	final Deck deck;
 	final Npc npc;
 	final Npc otherNpc;
+	
+	int[] roundResults = new int[HAND_SIZE+1];
 	Card npcCard;
 	Card otherNpcCard;
 	Card decreeCard;
@@ -29,21 +32,22 @@ public class NpcVsNpcGame extends Game {
 	boolean isOtherNpcSwan;
 	
 	/**
-	 * Creates a Game with two Npc players.
+	 * Creates a NpcVsNpcRoundSet with two Npc players.
 	 */
-	public NpcVsNpcGame(Npc npc, Npc otherNpc) {
+	public NpcVsNpcRoundSet(Npc npc, Npc otherNpc, int numRounds) {
 		deck = new Deck();
 		this.npc = npc;
 		this.otherNpc = otherNpc;
+		NUM_ROUNDS = numRounds;
 	}
 	
 	/**
 	 * Plays a game of The Fox In The Forest.
 	 */
-	public void playGame() {
-		int coinFlip = (int) (Math.random() * 2);
-		npcFirst = coinFlip == 0? true : false;
-		while (npcVictoryPoints < WIN_SCORE && otherNpcVictoryPoints < WIN_SCORE) {
+	public void playRounds() {
+		for (int i = 0; i < NUM_ROUNDS; i++) {
+			int coinFlip = (int) (Math.random() * 2);
+			npcFirst = coinFlip == 0? true : false;
 			deck.shuffle();
 			npc.drawHand(deck, HAND_SIZE);
 			otherNpc.drawHand(deck, HAND_SIZE);
@@ -68,7 +72,7 @@ public class NpcVsNpcGame extends Game {
 			scoreRound();
 			discardDecreeCard();
 		}	
-		determineWinnerAndPrint();
+		printResults();
 	}
 	
 	/**
@@ -102,10 +106,12 @@ public class NpcVsNpcGame extends Game {
 	 */
 	private void scoreTrick() {
 		int treasureBonus = 0;
+		/*
 		if (npcCard.getValue() == 7)
 			treasureBonus++;
 		if (otherNpcCard.getValue() == 7)
 			treasureBonus++;
+		*/
 		
 		if (trickWinner() == npc) {
 			npcRoundScore++;
@@ -192,14 +198,9 @@ public class NpcVsNpcGame extends Game {
 	 * based off their round scores and printing the results.
 	 */
 	private void scoreRound() {
-		System.out.println("\n\nEND OF ROUND RESULTS: ");
-		System.out.println(npcRoundScore + "-" + otherNpcRoundScore);
-		System.out.println("P1 gains +" + endOfRoundScore[npcRoundScore]);
-		System.out.println("P2 gains +" + endOfRoundScore[otherNpcRoundScore]);
+		roundResults[npcRoundScore]++;
 		npcVictoryPoints += endOfRoundScore[npcRoundScore];
 		otherNpcVictoryPoints += endOfRoundScore[otherNpcRoundScore];
-		System.out.println("CURRENT VICTORY POINTS: ");
-		System.out.println(npcVictoryPoints + "-" + otherNpcVictoryPoints);
 		npcRoundScore = 0;
 		otherNpcRoundScore = 0;
 	}
@@ -213,23 +214,31 @@ public class NpcVsNpcGame extends Game {
 		deck.putBottom(temp);
 	}
 	
-	/**
-	 * Determines the winner of the game and prints the results.
-	 */
-	private void determineWinnerAndPrint() {
-		System.out.println("\n\nFINAL SCORE: " + npcVictoryPoints + "-" + otherNpcVictoryPoints);
-		if (npcVictoryPoints > otherNpcVictoryPoints) {
-			System.out.println("P1 WINS");
+	private void printResults() {
+		
+		int wonRounds = 0;
+		for (int i = 0; i <= 3; i++) {
+			wonRounds += roundResults[i];
 		}
-		else if (npcVictoryPoints < otherNpcVictoryPoints) {
-			System.out.println("P2 WINS");
+		for (int i = 7; i <= 9; i++) {
+			wonRounds += roundResults[i];
 		}
-		else if (endOfRoundScore[npcRoundScore] > endOfRoundScore[otherNpcRoundScore]) {
-			System.out.println("P1 WINS BY WINNING THE LAST ROUND");
+		
+		System.out.println("ROUND RESULTS:");
+		for (int i = 0; i <= HAND_SIZE; i++) {
+			System.out.println(i + "-" + (HAND_SIZE-i) + ") " + roundResults[i]);
 		}
-		else {
-			System.out.println("P2 WINS BY WINNING THE LAST ROUND");
-		}
+		System.out.println("\nTOTAL VICTORY POINTS (NOT including Treasure bonuses)");
+		System.out.println(npcVictoryPoints + "-" + otherNpcVictoryPoints);
+		
+		double averageNpcVictoryPoints = (double) npcVictoryPoints / NUM_ROUNDS;
+		double averageOtherNpcVictoryPoints = (double) otherNpcVictoryPoints / NUM_ROUNDS;
+		System.out.println("Average Victory Points per round");
+		System.out.println(averageNpcVictoryPoints + "-" + averageOtherNpcVictoryPoints);
+		
+		System.out.println("WON " + wonRounds + "/" + NUM_ROUNDS);
+		System.out.println("WIN PERCENTAGE: " + (double) wonRounds / NUM_ROUNDS * 100);
+		
 	}
 	
 	/**
@@ -250,12 +259,11 @@ public class NpcVsNpcGame extends Game {
 	}
 	
 	/**
-	 * {@inheritDoc}
+	 * Returns the max integer value, as there are no victory points in this class.
+	 * @param a Player in this game
+	 * @return Integer.MAX_VALUE
 	 */
 	public int getPlayerNeededPoints(Player player) {
-		if (player == npc)
-			return WIN_SCORE - this.npcVictoryPoints;
-		else
-			return WIN_SCORE - this.otherNpcVictoryPoints;
+		return Integer.MAX_VALUE;
 	}
 }
