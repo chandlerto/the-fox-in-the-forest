@@ -1,7 +1,7 @@
 package edu.truman.To.fox_forest;
 
 /**
- * Plays a set amount of rounds between 2 Npcs.
+ * Plays a set amount of rounds between 2 NPCs.
  * The player leading each round is randomly selected,
  * so the result of each round is independent to the others. 
  * 
@@ -16,79 +16,117 @@ public class NpcVsNpcRoundSet extends Game {
 	
 	final int NUM_ROUNDS;
 	final Deck deck;
-	final Npc npc;
-	final Npc otherNpc;
 	
 	int[] roundResults = new int[HAND_SIZE+1];
-	Card npcCard;
-	Card otherNpcCard;
+	Card p1_Card;
+	Card p2_Card;
 	Card decreeCard;
-	int npcRoundScore;
-	int otherNpcRoundScore;
-	int npcVictoryPoints;
-	int otherNpcVictoryPoints;
-	boolean npcFirst;
-	boolean isNpcSwan;
-	boolean isOtherNpcSwan;
+	int p1_RoundScore;
+	int p2_RoundScore;
+	int p1_VictoryPoints;
+	int p2_VictoryPoints;
+	boolean p1_First;
+	boolean isp1_Swan;
+	boolean isp2_Swan;
+	
+	int p1_StrategyRequirement;
+	int p2_StrategyRequirement;
+	boolean playingRound;
+	int recordedRounds;
 	
 	/**
-	 * Creates a NpcVsNpcRoundSet with two Npc players.
+	 * Creates a NpcVsNpcRoundSet with two NPC players.
 	 */
-	public NpcVsNpcRoundSet(Npc npc, Npc otherNpc, int numRounds) {
+	public NpcVsNpcRoundSet(Npc npc, Npc otherNpc, int numRounds, int npcStrat, int otherNpcStrat) {
 		deck = new Deck();
-		this.npc = npc;
-		this.otherNpc = otherNpc;
+		p1 = npc;
+		p2 = otherNpc;
 		NUM_ROUNDS = numRounds;
+		p1_StrategyRequirement = npcStrat;
+		p2_StrategyRequirement = otherNpcStrat;
 	}
 	
 	/**
 	 * Plays a game of The Fox In The Forest.
 	 */
 	public void playRounds() {
-		for (int i = 0; i < NUM_ROUNDS; i++) {
+		while (recordedRounds < NUM_ROUNDS) {
 			int coinFlip = (int) (Math.random() * 2);
-			npcFirst = coinFlip == 0? true : false;
+			p1_First = coinFlip == 0? true : false;
+			
 			deck.shuffle();
-			npc.drawHand(deck, HAND_SIZE);
-			otherNpc.drawHand(deck, HAND_SIZE);
+			p1.drawHand(deck, HAND_SIZE);
+			p2.drawHand(deck, HAND_SIZE);
 			decreeCard = deck.draw();
-			while (npcRoundScore + otherNpcRoundScore < HAND_SIZE) {
-				if (npcFirst) {
-					npcCard = npc.selectCardFirst();
-					handleFirstThreeAbilities(npc, npcCard);
-					otherNpcCard = otherNpc.selectCardSecond(npcCard);
-					handleFirstThreeAbilities(otherNpc, otherNpcCard);
+			
+			decideIfPlayingRound();
+			if (playingRound) {
+				while (p1_RoundScore + p2_RoundScore < HAND_SIZE) {
+					if (p1_First) {
+						p1_Card = p1.selectCardFirst();
+						handleFirstThreeAbilities((Npc) p1, p1_Card);
+						p2_Card = p2.selectCardSecond(p1_Card);
+						handleFirstThreeAbilities((Npc) p2, p2_Card);
+					}
+					
+					else {
+						p2_Card = p2.selectCardFirst();
+						handleFirstThreeAbilities((Npc) p2, p2_Card);
+						p1_Card = p1.selectCardSecond(p2_Card);
+						handleFirstThreeAbilities((Npc) p1, p1_Card);
+					}
+					scoreTrick();
+					resetTrick();
 				}
-				
-				else {
-					otherNpcCard = otherNpc.selectCardFirst();
-					handleFirstThreeAbilities(otherNpc, otherNpcCard);
-					npcCard = npc.selectCardSecond(otherNpcCard);
-					handleFirstThreeAbilities(npc, npcCard);
-				}
-				scoreTrick();
-				resetTrick();
+				scoreAndResetRound();
 			}
-			scoreRound();
-			discardDecreeCard();
+			else {
+				collectAllCards();
+			}
 		}	
 		printResults();
 	}
 	
 	/**
+	 * Used to determine if the round meets the preset requirements
+	 * and should be played and recorded.
+	 */
+	private void decideIfPlayingRound() {
+		playingRound = true;
+		int npcStrat = ((Npc) p1).getStrategy();
+		int otherNpcStrat = ((Npc) p2).getStrategy();
+		if (p2_StrategyRequirement != 0 || p1_StrategyRequirement != 0) {
+			if (p2_StrategyRequirement < 0 && otherNpcStrat > 0 ||
+				p2_StrategyRequirement > 0 && otherNpcStrat <= 0 ||
+				p1_StrategyRequirement < 0 && npcStrat > 0 ||
+				p1_StrategyRequirement > 0 && npcStrat <= 0)
+				playingRound = false;
+		}
+	}
+	
+	/**
+	 * Takes all cards in the game and puts them into the deck.
+	 */
+	private void collectAllCards() {
+		((Npc) p1).clearHand(deck);
+		((Npc) p2).clearHand(deck);
+		discardDecreeCard();
+	}
+	
+	/**
 	 * Checks for and handles the Swan, Fox, and Woodcutter abilities.
-	 * Used after a Npc plays a card.
+	 * Used after a NPC plays a card.
 	 * 
-	 * @param npc the Npc who played the card.
+	 * @param npc the NPC who played the card.
 	 * @param card the card that was played.
 	 */
 	private void handleFirstThreeAbilities(Npc npc, Card card) {
 		if (card.getValue() == Card.SWAN) {
-			if (this.npc == npc) {
-				isNpcSwan = true;
+			if (p1 == npc) {
+				isp1_Swan = true;
 			}
 			else {
-				isOtherNpcSwan = true;
+				isp2_Swan = true;
 			}
 		}
 		else if (card.getValue() == Card.FOX) {
@@ -103,38 +141,33 @@ public class NpcVsNpcRoundSet extends Game {
 	 * Scores the trick, awarding the appropriate Victory Points (if any),
 	 * awarding the winner a round point, 
 	 * and determines which player will lead the next trick.
+	 * FOR THIS CLASS, TREASURE BONUS IS IGNORED.
 	 */
 	private void scoreTrick() {
 		int treasureBonus = 0;
-		/*
-		if (npcCard.getValue() == 7)
-			treasureBonus++;
-		if (otherNpcCard.getValue() == 7)
-			treasureBonus++;
-		*/
-		
-		if (trickWinner() == npc) {
-			npcRoundScore++;
-			npcVictoryPoints += treasureBonus;
-			if (isOtherNpcSwan) {
-				npcFirst = false;
+	
+		if (trickWinner() == p1) {
+			p1_RoundScore++;
+			p1_VictoryPoints += treasureBonus;
+			if (isp2_Swan) {
+				p1_First = false;
 			}
 			else {
-				npcFirst = true;
+				p1_First = true;
 			}
 		}
 		else {
-			otherNpcRoundScore++;
-			otherNpcVictoryPoints += treasureBonus;
-			if (isNpcSwan) {
-				npcFirst = true;
+			p2_RoundScore++;
+			p2_VictoryPoints += treasureBonus;
+			if (isp1_Swan) {
+				p1_First = true;
 			}
 			else {
-				npcFirst = false;
+				p1_First = false;
 			}
 		}
-		isNpcSwan = false;
-		isOtherNpcSwan = false;
+		isp1_Swan = false;
+		isp2_Swan = false;
 	}
 	
 	/**
@@ -143,39 +176,39 @@ public class NpcVsNpcRoundSet extends Game {
 	 * @return the Player that won the trick.
 	 */
 	private Player trickWinner() {
-		boolean isNpcWitch = npcCard.getValue() == Card.WITCH ? true : false;
-		boolean isOtherNpcWitch = otherNpcCard.getValue() == Card.WITCH ? true : false;
+		boolean isNpcWitch = p1_Card.getValue() == Card.WITCH ? true : false;
+		boolean isOtherNpcWitch = p2_Card.getValue() == Card.WITCH ? true : false;
 		if (isNpcWitch && isOtherNpcWitch) {
-			if (npcCard.getSuit() == decreeCard.getSuit()) {
-				return npc;
+			if (p1_Card.getSuit() == decreeCard.getSuit()) {
+				return p1;
 			}
-			else if (otherNpcCard.getSuit() == decreeCard.getSuit()) {
-				return otherNpc;
+			else if (p2_Card.getSuit() == decreeCard.getSuit()) {
+				return p2;
 			}
 			else {
-				return npcFirst ? npc : otherNpc;
+				return p1_First ? p1 : p2;
 			}
 		}
-		boolean isNpcTrump = npcCard.getSuit() == decreeCard.getSuit() 
+		boolean isNpcTrump = p1_Card.getSuit() == decreeCard.getSuit() 
 								|| isNpcWitch? true : false;
-		boolean isOtherNpcTrump = otherNpcCard.getSuit() == decreeCard.getSuit() 
+		boolean isOtherNpcTrump = p2_Card.getSuit() == decreeCard.getSuit() 
 				|| isOtherNpcWitch? true : false;
 		
 		if (isNpcTrump && !isOtherNpcTrump) {
-			return npc;
+			return p1;
 		}
 		else if (isOtherNpcTrump && !isNpcTrump) {
-			return otherNpc;
+			return p2;
 		}
 		else {
-			if (npcCard.getValue() > otherNpcCard.getValue()) {
-				return npc;
+			if (p1_Card.getValue() > p2_Card.getValue()) {
+				return p1;
 			}
-			else if (npcCard.getValue() < otherNpcCard.getValue()) {
-				return otherNpc;
+			else if (p1_Card.getValue() < p2_Card.getValue()) {
+				return p2;
 			}
 			else {
-				return npcFirst ? npc : otherNpc;
+				return p1_First ? p1 : p2;
 			}
 		}	
 	}
@@ -184,25 +217,31 @@ public class NpcVsNpcRoundSet extends Game {
 	 * Places the Player's cards onto the bottom of the deck.
 	 */
 	private void resetTrick() {
-		Card temp = npcCard;
-		npcCard = null;
+		Card temp = p1_Card;
+		p1_Card = null;
 		deck.putBottom(temp);
 		
-		Card temp1 = otherNpcCard;
-		otherNpcCard = null;
-		deck.putBottom(temp1);
+		Card temp1_ = p2_Card;
+		p2_Card = null;
+		deck.putBottom(temp1_);
 	}
 	
 	/**
 	 * Scores the round, increasing each player's Victory Points
 	 * based off their round scores and printing the results.
 	 */
-	private void scoreRound() {
-		roundResults[npcRoundScore]++;
-		npcVictoryPoints += endOfRoundScore[npcRoundScore];
-		otherNpcVictoryPoints += endOfRoundScore[otherNpcRoundScore];
-		npcRoundScore = 0;
-		otherNpcRoundScore = 0;
+	private void scoreAndResetRound() {
+		if (playingRound) {
+			roundResults[p1_RoundScore]++;
+			recordedRounds++;
+			p1_VictoryPoints += endOfRoundScore[p1_RoundScore];
+			p2_VictoryPoints += endOfRoundScore[p2_RoundScore];
+		}
+		
+		p1_RoundScore = 0;
+		p2_RoundScore = 0;
+		
+		discardDecreeCard();
 	}
 	
 	/**
@@ -214,6 +253,9 @@ public class NpcVsNpcRoundSet extends Game {
 		deck.putBottom(temp);
 	}
 	
+	/**
+	 * Used to output to the screen the results.
+	 */
 	private void printResults() {
 		
 		int wonRounds = 0;
@@ -229,15 +271,41 @@ public class NpcVsNpcRoundSet extends Game {
 			System.out.println(i + "-" + (HAND_SIZE-i) + ") " + roundResults[i]);
 		}
 		System.out.println("\nTOTAL VICTORY POINTS (NOT including Treasure bonuses)");
-		System.out.println(npcVictoryPoints + "-" + otherNpcVictoryPoints);
+		System.out.println(p1_VictoryPoints + "-" + p2_VictoryPoints);
 		
-		double averageNpcVictoryPoints = (double) npcVictoryPoints / NUM_ROUNDS;
-		double averageOtherNpcVictoryPoints = (double) otherNpcVictoryPoints / NUM_ROUNDS;
+		double averagep1_VictoryPoints = (double) p1_VictoryPoints / recordedRounds;
+		double averagep2_VictoryPoints = (double) p2_VictoryPoints / recordedRounds;
 		System.out.println("Average Victory Points per round");
-		System.out.println(averageNpcVictoryPoints + "-" + averageOtherNpcVictoryPoints);
+		System.out.println(averagep1_VictoryPoints + "-" + averagep2_VictoryPoints);
 		
-		System.out.println("WON " + wonRounds + "/" + NUM_ROUNDS);
-		System.out.println("WIN PERCENTAGE: " + (double) wonRounds / NUM_ROUNDS * 100);
+		System.out.println("WON " + wonRounds + "/" + recordedRounds);
+		System.out.println("WIN PERCENTAGE: " + (double) wonRounds / recordedRounds * 100);
+		
+		int winLow = 0; 
+		for (int i = 0; i < 4; i++) {
+			winLow += roundResults[i];
+		}
+		System.out.println("WON LOW: " + (double) winLow / recordedRounds * 100);
+		
+		int lostLow = 0; 
+		for (int i = 4; i < 7; i++) {
+			lostLow += roundResults[i];
+		}
+		System.out.println("LOST LOW: " + (double) lostLow / recordedRounds * 100);
+		
+		int winHigh = 0; 
+		for (int i = 7; i < 10; i++) {
+			winHigh += roundResults[i];
+		}
+		System.out.println("WON HIGH: " + (double) winHigh / recordedRounds * 100);
+		
+		int lostHigh = 0; 
+		for (int i = 10; i < 14; i++) {
+			lostHigh += roundResults[i];
+		}
+		System.out.println("LOST HIGH: " + (double) lostHigh / recordedRounds * 100);
+		
+		
 		
 	}
 	
@@ -252,10 +320,20 @@ public class NpcVsNpcRoundSet extends Game {
 	 * {@inheritDoc}
 	 */
 	public int getPlayerRoundScore(Player player) {
-		if (player == npc)
-			return npcRoundScore;
+		if (player == p1)
+			return p1_RoundScore;
 		else
-			return otherNpcRoundScore;
+			return p2_RoundScore;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getOtherRoundScore(Player player) {
+		if (player == p1)
+			return p2_RoundScore;
+		else
+			return p1_RoundScore;
 	}
 	
 	/**

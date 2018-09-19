@@ -50,7 +50,26 @@ public class HighDummyNpc extends Npc {
 			hand.add(hand.remove(minIdx));
 		}
 	}
+	
+	/**
+	 * Returns the NPC's strategy.
+	 * For this NPC which only has a single strategy, 0 is always returned.
+	 * 
+	 * @return an integer showing this npc's strategy (always 0).
+	 */
+	public int getStrategy() {
+		return 0;
+	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public void clearHand(Deck deck) {
+		while (hand.size() > 0) {
+			deck.putBottom(hand.remove(0));
+		}
+	}
+	
 	/**
 	 * Selects and removes the highest valued card in hand,
 	 * as determined by the Card class' compareTo method.
@@ -93,8 +112,7 @@ public class HighDummyNpc extends Npc {
 	@Override
 	public Card swapDecreeCard(Card current) {
 		return current;
-	}
-
+	}	
 	
 	/**
 	 * Computer is offered a card, but discards it immediately.

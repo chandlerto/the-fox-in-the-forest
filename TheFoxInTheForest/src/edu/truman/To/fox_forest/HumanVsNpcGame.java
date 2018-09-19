@@ -15,8 +15,6 @@ public class HumanVsNpcGame extends Game {
 	static final int[] endOfRoundScore = {6,6,6,6,1,2,3,6,6,6,0,0,0,0};
 	
 	final Deck deck;
-	final Human human;
-	final Npc npc;
 	Card humanCard;
 	Card npcCard;
 	Card decreeCard;
@@ -34,8 +32,8 @@ public class HumanVsNpcGame extends Game {
 	 */
 	public HumanVsNpcGame(Npc npc) {
 		deck = new Deck();
-		human = new Human();
-		this.npc = npc;
+		p1 = new Human();
+		p2 = npc;
 	}
 	
 	/**
@@ -46,31 +44,31 @@ public class HumanVsNpcGame extends Game {
 		humanFirst = coinFlip == 0? true : false;
 		while (humanVictoryPoints < WIN_SCORE && npcVictoryPoints < WIN_SCORE) {
 			deck.shuffle();
-			human.drawHand(deck, HAND_SIZE);
-			npc.drawHand(deck, HAND_SIZE);
+			p1.drawHand(deck, HAND_SIZE);
+			p2.drawHand(deck, HAND_SIZE);
 			decreeCard = deck.draw();
 			while (humanRoundScore + npcRoundScore < 13) {
 				if (humanFirst) {
 					printGameInfo();
 					System.out.println("HUMAN IS LEADING");
-					humanCard = human.selectCardFirst();
-					handleFirstThreeAbilities(human, humanCard);
+					humanCard = p1.selectCardFirst();
+					handleFirstThreeAbilities((Human) p1, humanCard);
 					
-					npcCard = npc.selectCardSecond(humanCard);
+					npcCard = p2.selectCardSecond(humanCard);
 					printNpcTurn();
-					handleFirstThreeAbilities(npc, npcCard);
+					handleFirstThreeAbilities((Npc) p2, npcCard);
 					
 				}
 				
 				else {
 					
-					npcCard = npc.selectCardFirst();
-					handleFirstThreeAbilities(npc, npcCard);
+					npcCard = p2.selectCardFirst();
+					handleFirstThreeAbilities((Npc) p2, npcCard);
 					
 					printGameInfo();
 					System.out.println("HUMAN IS FOLLOWING");
-					humanCard = human.selectCardSecond(npcCard);
-					handleFirstThreeAbilities(human, humanCard);
+					humanCard = p1.selectCardSecond(npcCard);
+					handleFirstThreeAbilities((Human) p1, humanCard);
 				}
 				scoreTrick();
 				resetTrick();
@@ -173,7 +171,7 @@ public class HumanVsNpcGame extends Game {
 		if (npcCard.getValue() == 7)
 			treasureBonus++;
 		
-		if (trickWinner() == human) {
+		if (trickWinner() == p1) {
 			humanRoundScore++;
 			humanVictoryPoints += treasureBonus;
 			if (isNpcSwan) {
@@ -208,15 +206,15 @@ public class HumanVsNpcGame extends Game {
 		if (isHumanWitch && isNpcWitch) {
 			if (humanCard.getSuit() == decreeCard.getSuit()) {
 				System.out.println("Human wins by trump suit");
-				return human;
+				return p1;
 			}
 			else if (npcCard.getSuit() == decreeCard.getSuit()) {
 				System.out.println("NPC wins by trump suit");
-				return npc;
+				return p2;
 			}
 			else {
 				System.out.println("Tie, so leading player wins the trick");
-				return humanFirst ? human : npc;
+				return humanFirst ? p1 : p2;
 			}
 		}
 		boolean isHumanTrump = humanCard.getSuit() == decreeCard.getSuit() 
@@ -226,24 +224,24 @@ public class HumanVsNpcGame extends Game {
 		
 		if (isHumanTrump && !isNpcTrump) {
 			System.out.println("Human wins by trump suit");
-			return human;
+			return p1;
 		}
 		else if (isNpcTrump && !isHumanTrump) {
 			System.out.println("NPC wins by trump suit");
-			return npc;
+			return p2;
 		}
 		else {
 			if (humanCard.getValue() > npcCard.getValue()) {
 				System.out.println("Human wins by higher value");
-				return human;
+				return p1;
 			}
 			else if (humanCard.getValue() < npcCard.getValue()) {
 				System.out.println("NPC wins by higher value");
-				return npc;
+				return p2;
 			}
 			else {
 				System.out.println("Tie, so leading player wins the trick");
-				return humanFirst ? human : npc;
+				return humanFirst ? p1 : p2;
 			}
 		}	
 	}
@@ -316,7 +314,7 @@ public class HumanVsNpcGame extends Game {
 	 * {@inheritDoc}
 	 */
 	public int getPlayerRoundScore(Player player) {
-		if (player == human)
+		if (player == p1)
 			return humanRoundScore;
 		else
 			return npcRoundScore;
@@ -325,8 +323,18 @@ public class HumanVsNpcGame extends Game {
 	/**
 	 * {@inheritDoc}
 	 */
+	public int getOtherRoundScore(Player player) {
+		if (player == p1)
+			return npcRoundScore;
+		else
+			return humanRoundScore;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	public int getPlayerNeededPoints(Player player) {
-		if (player == human)
+		if (player == p1)
 			return WIN_SCORE - this.humanVictoryPoints;
 		else
 			return WIN_SCORE - this.npcVictoryPoints;

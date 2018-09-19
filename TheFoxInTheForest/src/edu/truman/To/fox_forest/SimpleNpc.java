@@ -13,13 +13,27 @@ import edu.truman.To.fox_forest.Npc;
  *
  */
 public class SimpleNpc extends Npc {
-
+	
+	static final int[][] scoreStrategies = new int[][] { 
+		{  0,  0,  1,  1,  1, -1, -1, -1, -1, -1 },
+		{  0,  0,  0,  1,  1,  1, -1, -1, -1, -1 },
+		{  0,  0,  0,  0,  1,  1,  1, -1, -1, -1 },
+		{ -1,  0,  0,  0,  1,  1,  1,  1, -1, -1 },
+		{ -1, -1,  0,  0,  1,  1,  1,  1,  1 },
+		{ -1, -1, -1,  0,  1,  1,  1,  1 },
+		{ -1, -1, -1, -1,  1,  1,  1 },
+		{ -1, -1, -1, -1,  1,  1},
+		{ -1, -1, -1, -1,  1 },
+		{ -1, -1, -1, -1 },
+	};
+	
 	static final int[] cardRatings = {-8, -7, -4, -2, -1, 0, 2, 5, 10, 8, 10}; 
 	
 	private int[] numSuit;
 	private boolean[][] haveCard;
 	private ArrayList<Card> hand;
 	
+	private int winIndex;
 	private boolean aimingHigh;
 	
 	/**
@@ -73,11 +87,47 @@ public class SimpleNpc extends Npc {
 	 * determine the strategy for the round.
 	 */
 	private void evaluateHand() {
-		int winIndex = 0;
+		winIndex = 0;
 		for (Card card : hand) {
 			winIndex += cardRatings[card.getValue()-1];
 		}
 		aimingHigh = winIndex > 0 ? true : false;
+	}
+	
+	/**
+	 * Returns an integer representing this NPC's current strategy.
+	 * Above 0 denotes high, 0 and below denotes low.
+	 * 
+	 * @return the NPC's current strategy
+	 */
+	public int getStrategy() {
+		return winIndex;
+	}
+	
+	/**
+	 * Used at each time before playing a card to determine whether
+	 * the current strategy of the npc should change.
+	 */
+	private void adaptStrategy() {
+		int myScore = game.getPlayerRoundScore(this);
+		int otherScore = game.getOtherRoundScore(this);
+		if (myScore < 10 && otherScore < 10) {
+			if (scoreStrategies[otherScore][myScore] < 0) {
+				aimingHigh = false;
+			}
+			else if (scoreStrategies[otherScore][myScore] > 0) {
+				aimingHigh = true;
+			}
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void clearHand(Deck deck) {
+		while (hand.size() > 0) {
+			deck.putBottom(removeCard(0));
+		}
 	}
 	
 	/**
@@ -86,6 +136,7 @@ public class SimpleNpc extends Npc {
 	@Override
 	public Card selectCardFirst() {
 		
+		adaptStrategy();
 		/*
 		 * If aiming high, play cards above 7 in ascending order.
 		 * If none available, play the lowest card in hand. 
@@ -159,8 +210,14 @@ public class SimpleNpc extends Npc {
 		return hand.remove(idx);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Card selectCardSecond(Card lead) {
+		
+		adaptStrategy();
+		
 		int leadValue = lead.getValue();
 		int leadSuit = lead.getSuit();
 		int decreeSuit = game.getDecreeCard().getSuit();
@@ -351,11 +408,29 @@ public class SimpleNpc extends Npc {
 		return 0;
 	}
 	
+	/**
+	 * Adds the decree card to the NPC's hand, then removes a card of the NPC's choice.
+	 * Used when the NPC has played a card with the "Fox" ability, which allows
+	 * the NPC to switch the decree card with a card from hand.
+	 * Currently, this NPC always discards the decree card back.
+	 * 
+	 * @param current the current decree card.
+	 * @return the card that the player wishes to discard.
+	 */
 	@Override
 	public Card swapDecreeCard(Card current) {
 		return current;
 	}
 
+	/**
+	 * Adds a card from the deck to the NPC's hand, then removes a card of the NPC's choice.
+	 * Used when the NPC has played a card with the "Woodcutter" ability, which allows
+	 * the NPC to draw a card, then discard a card.
+	 * Currently, this NPC always discards the card just drawn.
+	 * 
+	 * @param drawn the card that the NPC draws.
+	 * @return the card that the player wishes to discard.
+	 */
 	@Override
 	public Card drawAndDiscard(Card drawn) {
 		return drawn;

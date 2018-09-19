@@ -15,26 +15,24 @@ public class NpcVsNpcGame extends Game {
 	static final int[] endOfRoundScore = {6,6,6,6,1,2,3,6,6,6,0,0,0,0};
 	
 	final Deck deck;
-	final Npc npc;
-	final Npc otherNpc;
-	Card npcCard;
-	Card otherNpcCard;
+	Card p1Card;
+	Card p2Card;
 	Card decreeCard;
-	int npcRoundScore;
-	int otherNpcRoundScore;
-	int npcVictoryPoints;
-	int otherNpcVictoryPoints;
-	boolean npcFirst;
-	boolean isNpcSwan;
-	boolean isOtherNpcSwan;
+	int p1RoundScore;
+	int p2RoundScore;
+	int p1VictoryPoints;
+	int p2VictoryPoints;
+	boolean p1First;
+	boolean isP1Swan;
+	boolean isP2Swan;
 	
 	/**
-	 * Creates a Game with two Npc players.
+	 * Creates a Game with two NPC players.
 	 */
 	public NpcVsNpcGame(Npc npc, Npc otherNpc) {
 		deck = new Deck();
-		this.npc = npc;
-		this.otherNpc = otherNpc;
+		p1 = npc;
+		p2 = otherNpc;
 	}
 	
 	/**
@@ -42,25 +40,25 @@ public class NpcVsNpcGame extends Game {
 	 */
 	public void playGame() {
 		int coinFlip = (int) (Math.random() * 2);
-		npcFirst = coinFlip == 0? true : false;
-		while (npcVictoryPoints < WIN_SCORE && otherNpcVictoryPoints < WIN_SCORE) {
+		p1First = coinFlip == 0? true : false;
+		while (p1VictoryPoints < WIN_SCORE && p2VictoryPoints < WIN_SCORE) {
 			deck.shuffle();
-			npc.drawHand(deck, HAND_SIZE);
-			otherNpc.drawHand(deck, HAND_SIZE);
+			p1.drawHand(deck, HAND_SIZE);
+			p2.drawHand(deck, HAND_SIZE);
 			decreeCard = deck.draw();
-			while (npcRoundScore + otherNpcRoundScore < HAND_SIZE) {
-				if (npcFirst) {
-					npcCard = npc.selectCardFirst();
-					handleFirstThreeAbilities(npc, npcCard);
-					otherNpcCard = otherNpc.selectCardSecond(npcCard);
-					handleFirstThreeAbilities(otherNpc, otherNpcCard);
+			while (p1RoundScore + p2RoundScore < HAND_SIZE) {
+				if (p1First) {
+					p1Card = p1.selectCardFirst();
+					handleFirstThreeAbilities((Npc) p1, p1Card);
+					p2Card = p2.selectCardSecond(p1Card);
+					handleFirstThreeAbilities((Npc) p2, p2Card);
 				}
 				
 				else {
-					otherNpcCard = otherNpc.selectCardFirst();
-					handleFirstThreeAbilities(otherNpc, otherNpcCard);
-					npcCard = npc.selectCardSecond(otherNpcCard);
-					handleFirstThreeAbilities(npc, npcCard);
+					p2Card = p2.selectCardFirst();
+					handleFirstThreeAbilities((Npc) p2, p2Card);
+					p1Card = p1.selectCardSecond(p2Card);
+					handleFirstThreeAbilities((Npc) p1, p1Card);
 				}
 				scoreTrick();
 				resetTrick();
@@ -73,18 +71,18 @@ public class NpcVsNpcGame extends Game {
 	
 	/**
 	 * Checks for and handles the Swan, Fox, and Woodcutter abilities.
-	 * Used after a Npc plays a card.
+	 * Used after a NPC plays a card.
 	 * 
-	 * @param npc the Npc who played the card.
+	 * @param npc the NPC who played the card.
 	 * @param card the card that was played.
 	 */
 	private void handleFirstThreeAbilities(Npc npc, Card card) {
 		if (card.getValue() == Card.SWAN) {
-			if (this.npc == npc) {
-				isNpcSwan = true;
+			if (p1 == npc) {
+				isP1Swan = true;
 			}
 			else {
-				isOtherNpcSwan = true;
+				isP2Swan = true;
 			}
 		}
 		else if (card.getValue() == Card.FOX) {
@@ -102,33 +100,33 @@ public class NpcVsNpcGame extends Game {
 	 */
 	private void scoreTrick() {
 		int treasureBonus = 0;
-		if (npcCard.getValue() == 7)
+		if (p1Card.getValue() == 7)
 			treasureBonus++;
-		if (otherNpcCard.getValue() == 7)
+		if (p2Card.getValue() == 7)
 			treasureBonus++;
 		
-		if (trickWinner() == npc) {
-			npcRoundScore++;
-			npcVictoryPoints += treasureBonus;
-			if (isOtherNpcSwan) {
-				npcFirst = false;
+		if (trickWinner() == p1) {
+			p1RoundScore++;
+			p1VictoryPoints += treasureBonus;
+			if (isP2Swan) {
+				p1First = false;
 			}
 			else {
-				npcFirst = true;
+				p1First = true;
 			}
 		}
 		else {
-			otherNpcRoundScore++;
-			otherNpcVictoryPoints += treasureBonus;
-			if (isNpcSwan) {
-				npcFirst = true;
+			p2RoundScore++;
+			p2VictoryPoints += treasureBonus;
+			if (isP1Swan) {
+				p1First = true;
 			}
 			else {
-				npcFirst = false;
+				p1First = false;
 			}
 		}
-		isNpcSwan = false;
-		isOtherNpcSwan = false;
+		isP1Swan = false;
+		isP2Swan = false;
 	}
 	
 	/**
@@ -137,39 +135,39 @@ public class NpcVsNpcGame extends Game {
 	 * @return the Player that won the trick.
 	 */
 	private Player trickWinner() {
-		boolean isNpcWitch = npcCard.getValue() == Card.WITCH ? true : false;
-		boolean isOtherNpcWitch = otherNpcCard.getValue() == Card.WITCH ? true : false;
+		boolean isNpcWitch = p1Card.getValue() == Card.WITCH ? true : false;
+		boolean isOtherNpcWitch = p2Card.getValue() == Card.WITCH ? true : false;
 		if (isNpcWitch && isOtherNpcWitch) {
-			if (npcCard.getSuit() == decreeCard.getSuit()) {
-				return npc;
+			if (p1Card.getSuit() == decreeCard.getSuit()) {
+				return p1;
 			}
-			else if (otherNpcCard.getSuit() == decreeCard.getSuit()) {
-				return otherNpc;
+			else if (p2Card.getSuit() == decreeCard.getSuit()) {
+				return p2;
 			}
 			else {
-				return npcFirst ? npc : otherNpc;
+				return p1First ? p1 : p2;
 			}
 		}
-		boolean isNpcTrump = npcCard.getSuit() == decreeCard.getSuit() 
+		boolean isNpcTrump = p1Card.getSuit() == decreeCard.getSuit() 
 								|| isNpcWitch? true : false;
-		boolean isOtherNpcTrump = otherNpcCard.getSuit() == decreeCard.getSuit() 
+		boolean isOtherNpcTrump = p2Card.getSuit() == decreeCard.getSuit() 
 				|| isOtherNpcWitch? true : false;
 		
 		if (isNpcTrump && !isOtherNpcTrump) {
-			return npc;
+			return p1;
 		}
 		else if (isOtherNpcTrump && !isNpcTrump) {
-			return otherNpc;
+			return p2;
 		}
 		else {
-			if (npcCard.getValue() > otherNpcCard.getValue()) {
-				return npc;
+			if (p1Card.getValue() > p2Card.getValue()) {
+				return p1;
 			}
-			else if (npcCard.getValue() < otherNpcCard.getValue()) {
-				return otherNpc;
+			else if (p1Card.getValue() < p2Card.getValue()) {
+				return p2;
 			}
 			else {
-				return npcFirst ? npc : otherNpc;
+				return p1First ? p1 : p2;
 			}
 		}	
 	}
@@ -178,12 +176,12 @@ public class NpcVsNpcGame extends Game {
 	 * Places the Player's cards onto the bottom of the deck.
 	 */
 	private void resetTrick() {
-		Card temp = npcCard;
-		npcCard = null;
+		Card temp = p1Card;
+		p1Card = null;
 		deck.putBottom(temp);
 		
-		Card temp1 = otherNpcCard;
-		otherNpcCard = null;
+		Card temp1 = p2Card;
+		p2Card = null;
 		deck.putBottom(temp1);
 	}
 	
@@ -193,15 +191,15 @@ public class NpcVsNpcGame extends Game {
 	 */
 	private void scoreRound() {
 		System.out.println("\n\nEND OF ROUND RESULTS: ");
-		System.out.println(npcRoundScore + "-" + otherNpcRoundScore);
-		System.out.println("P1 gains +" + endOfRoundScore[npcRoundScore]);
-		System.out.println("P2 gains +" + endOfRoundScore[otherNpcRoundScore]);
-		npcVictoryPoints += endOfRoundScore[npcRoundScore];
-		otherNpcVictoryPoints += endOfRoundScore[otherNpcRoundScore];
+		System.out.println(p1RoundScore + "-" + p2RoundScore);
+		System.out.println("P1 gains +" + endOfRoundScore[p1RoundScore]);
+		System.out.println("P2 gains +" + endOfRoundScore[p2RoundScore]);
+		p1VictoryPoints += endOfRoundScore[p1RoundScore];
+		p2VictoryPoints += endOfRoundScore[p2RoundScore];
 		System.out.println("CURRENT VICTORY POINTS: ");
-		System.out.println(npcVictoryPoints + "-" + otherNpcVictoryPoints);
-		npcRoundScore = 0;
-		otherNpcRoundScore = 0;
+		System.out.println(p1VictoryPoints + "-" + p2VictoryPoints);
+		p1RoundScore = 0;
+		p2RoundScore = 0;
 	}
 	
 	/**
@@ -217,14 +215,14 @@ public class NpcVsNpcGame extends Game {
 	 * Determines the winner of the game and prints the results.
 	 */
 	private void determineWinnerAndPrint() {
-		System.out.println("\n\nFINAL SCORE: " + npcVictoryPoints + "-" + otherNpcVictoryPoints);
-		if (npcVictoryPoints > otherNpcVictoryPoints) {
+		System.out.println("\n\nFINAL SCORE: " + p1VictoryPoints + "-" + p2VictoryPoints);
+		if (p1VictoryPoints > p2VictoryPoints) {
 			System.out.println("P1 WINS");
 		}
-		else if (npcVictoryPoints < otherNpcVictoryPoints) {
+		else if (p1VictoryPoints < p2VictoryPoints) {
 			System.out.println("P2 WINS");
 		}
-		else if (endOfRoundScore[npcRoundScore] > endOfRoundScore[otherNpcRoundScore]) {
+		else if (endOfRoundScore[p1RoundScore] > endOfRoundScore[p2RoundScore]) {
 			System.out.println("P1 WINS BY WINNING THE LAST ROUND");
 		}
 		else {
@@ -243,19 +241,29 @@ public class NpcVsNpcGame extends Game {
 	 * {@inheritDoc}
 	 */
 	public int getPlayerRoundScore(Player player) {
-		if (player == npc)
-			return npcRoundScore;
+		if (player == p1)
+			return p1RoundScore;
 		else
-			return otherNpcRoundScore;
+			return p2RoundScore;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getOtherRoundScore(Player player) {
+		if (player == p1)
+			return p2RoundScore;
+		else
+			return p1RoundScore;
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	public int getPlayerNeededPoints(Player player) {
-		if (player == npc)
-			return WIN_SCORE - this.npcVictoryPoints;
+		if (player == p1)
+			return WIN_SCORE - this.p1VictoryPoints;
 		else
-			return WIN_SCORE - this.otherNpcVictoryPoints;
+			return WIN_SCORE - this.p2VictoryPoints;
 	}
 }

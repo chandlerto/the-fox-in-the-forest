@@ -65,10 +65,16 @@ public class TheFoxInTheForest {
 			else
 				p2 = new SimpleNpc();
 			
+			System.out.println("Enter the required StrategyIndex for P1 (enter 0 if unknown)");
+			int npcStratReq = scandy.nextInt();
+			System.out.println("Enter the required StrategyIndex for P2 (enter 0 if unknown)");
+			int otherNpcStratReq = scandy.nextInt();
+			
+			
 			System.out.println("Enter how many rounds will be played.");
 			int numRounds = scandy.nextInt();
 			
-			NpcVsNpcRoundSet game = new NpcVsNpcRoundSet(p1, p2, numRounds);
+			NpcVsNpcRoundSet game = new NpcVsNpcRoundSet(p1, p2, numRounds, npcStratReq, otherNpcStratReq);
 			p1.addGame(game);
 			p2.addGame(game);
 			game.playRounds();

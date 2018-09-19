@@ -13,8 +13,8 @@ public abstract class Npc implements Player {
 	protected Game game;
 	
 	/**
-	 * Sets this player's game to be the given Game.
-	 * @param game the game the Npc is a part of
+	 * Sets this NPC's game to be the given Game.
+	 * @param game the game the NPC is a part of
 	 */
 	public void addGame(Game game) {
 		this.game = game;
@@ -31,6 +31,15 @@ public abstract class Npc implements Player {
 	 */
 	@Override
 	public abstract void sortHand();
+	
+	/**
+	 * Returns an integer showing the computer's strategy. 
+	 * A value over 0 denotes high, while a value of 0 or less denotes low.
+	 * For NPCs which only use a single strategy, 0 is always returned.
+	 * 
+	 * @return the current strategy of the computer
+	 */
+	public abstract int getStrategy();
 
 	/**
 	 * {@inheritDoc}
@@ -55,5 +64,12 @@ public abstract class Npc implements Player {
 	 */
 	@Override
 	public abstract Card drawAndDiscard(Card drawn);
+	
+	/**
+	 * Places all cards in the NPC's hand into the given Deck.
+	 * 
+	 * @param deck the deck that the NPC discards to
+	 */
+	public abstract void clearHand(Deck deck);
 
 }
